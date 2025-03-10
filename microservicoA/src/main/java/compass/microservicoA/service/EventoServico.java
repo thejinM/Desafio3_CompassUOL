@@ -38,6 +38,18 @@ public class EventoServico
     return eventoRepositorio.findById(id).map(this::paraEventoDTO).orElseThrow(() -> new RuntimeException("Evento não encontrado!"));
   }
 
+  public List<EventoDTO> buscarEventosOrdenados() 
+  {
+    List<Evento> eventos = eventoRepositorio.findAllByOrderByNomeEventoAsc();
+
+    if (eventos.isEmpty()) 
+    {
+      throw new RuntimeException("Nenhum evento encontrado!");
+    }
+  
+    return eventos.stream().map(this::paraEventoDTO).collect(Collectors.toList());
+  }
+
   public EventoDTO criarEvento(EventoDTO dto)
   {
     try
@@ -73,12 +85,12 @@ public class EventoServico
       
       if (!eventoAtualizado.getCep().equals(eventoDTO.getCep())) 
       {
-          ViaCEPResposta viaCepRetorno = viaCEP.consultarCEP(eventoDTO.getCep());
-          eventoAtualizado.setCep(viaCepRetorno.getCep());
-          eventoAtualizado.setLogradouro(viaCepRetorno.getLogradouro());
-          eventoAtualizado.setBairro(viaCepRetorno.getBairro());
-          eventoAtualizado.setCidade(viaCepRetorno.getLocalidade());
-          eventoAtualizado.setUf(viaCepRetorno.getUf());
+        ViaCEPResposta viaCepRetorno = viaCEP.consultarCEP(eventoDTO.getCep());
+        eventoAtualizado.setCep(viaCepRetorno.getCep());
+        eventoAtualizado.setLogradouro(viaCepRetorno.getLogradouro());
+        eventoAtualizado.setBairro(viaCepRetorno.getBairro());
+        eventoAtualizado.setCidade(viaCepRetorno.getLocalidade());
+        eventoAtualizado.setUf(viaCepRetorno.getUf());
       }
       
       return paraEventoDTO(eventoRepositorio.save(eventoAtualizado));
