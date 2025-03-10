@@ -5,6 +5,7 @@ import compass.microservicoA.entity.Evento;
 import compass.microservicoA.integracao.ViaCEP;
 import compass.microservicoA.integracao.ViaCEPResposta;
 import compass.microservicoA.repository.EventoRepositorio;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +21,7 @@ public class EventoServico
   @Autowired
   private ViaCEP viaCEP;
 
-  public List<EventoDTO> buscarTodos()
+  public List<EventoDTO> buscarEventos()
   {
     List<Evento> eventos = eventoRepositorio.findAll();
 
@@ -29,12 +30,12 @@ public class EventoServico
       throw new RuntimeException("Nenhum evento encontrado!");
     }
 
-    return eventos.stream().map(this::paraDTO).collect(Collectors.toList());
+    return eventos.stream().map(this::paraEventoDTO).collect(Collectors.toList());
   }
 
-  public EventoDTO buscarEventoPorId(String id)
+  public EventoDTO buscarEventoPorID(String id)
   {
-    return eventoRepositorio.findById(id).map(this::paraDTO).orElseThrow(() -> new RuntimeException("Evento não encontrado!"));
+    return eventoRepositorio.findById(id).map(this::paraEventoDTO).orElseThrow(() -> new RuntimeException("Evento não encontrado!"));
   }
 
   public EventoDTO criarEvento(EventoDTO dto)
@@ -42,8 +43,8 @@ public class EventoServico
     try
     {
       ViaCEPResposta viaCep = viaCEP.consultarCEP(dto.getCep());
-
       Evento evento = new Evento();
+
       evento.setDataHora(dto.getDataHora());
       evento.setNomeEvento(dto.getNomeEvento());
       evento.setCep(dto.getCep());
@@ -53,7 +54,7 @@ public class EventoServico
       evento.setUf(viaCep.getUf());
       evento.setDescricao(dto.getDescricao());
 
-      return paraDTO(eventoRepositorio.save(evento));
+      return paraEventoDTO(eventoRepositorio.save(evento));
     }
     catch (Exception e)
     {
@@ -61,16 +62,26 @@ public class EventoServico
     }
   }
 
-  public EventoDTO atualizarEvento(String id, EventoDTO dto)
+  public EventoDTO atualizarEventoPorID(String id, EventoDTO eventoDTO)
   {
-    Evento eventoExistente = eventoRepositorio.findById(id).orElseThrow(() -> new RuntimeException("Evento não encontrado!"));
-
-    eventoExistente.setDataHora(dto.getDataHora());
-    eventoExistente.setNomeEvento(dto.getNomeEvento());
-    eventoExistente.setDescricao(dto.getDescricao());
-    try
+    try 
     {
-      return paraDTO(eventoRepositorio.save(eventoExistente));
+      Evento eventoAtualizado = eventoRepositorio.findById(id).orElseThrow(() -> new RuntimeException("Evento não encontrado!"));
+
+      eventoAtualizado.setNomeEvento(eventoDTO.getNomeEvento());
+      eventoAtualizado.setDataHora(eventoDTO.getDataHora());
+      
+      if (!eventoAtualizado.getCep().equals(eventoDTO.getCep())) 
+      {
+          ViaCEPResposta viaCepRetorno = viaCEP.consultarCEP(eventoDTO.getCep());
+          eventoAtualizado.setCep(viaCepRetorno.getCep());
+          eventoAtualizado.setLogradouro(viaCepRetorno.getLogradouro());
+          eventoAtualizado.setBairro(viaCepRetorno.getBairro());
+          eventoAtualizado.setCidade(viaCepRetorno.getLocalidade());
+          eventoAtualizado.setUf(viaCepRetorno.getUf());
+      }
+      
+      return paraEventoDTO(eventoRepositorio.save(eventoAtualizado));
     }
     catch (Exception e)
     {
@@ -78,23 +89,21 @@ public class EventoServico
     }
   }
 
-  public void deletarEvento(String id)
+  public void deletarEventoPorID(String id)
   {
-    if (!eventoRepositorio.existsById(id))
-    {
-      throw new RuntimeException("Evento não encontrado!");
-    }
+    Evento evento = eventoRepositorio.findById(id).orElseThrow(() -> new RuntimeException("Evento não encontrado!"));
+
     try
     {
-      eventoRepositorio.deleteById(id);
+      eventoRepositorio.delete(evento); 
     }
     catch (Exception e)
     {
       throw new RuntimeException("Erro ao deletar evento!");
     }
   }
-
-  private EventoDTO paraDTO(Evento evento)
+  
+  private EventoDTO paraEventoDTO(Evento evento)
   {
     return new EventoDTO
     (
