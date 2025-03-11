@@ -28,7 +28,7 @@ public class EventoControlador
     @ApiResponse(responseCode = "200", description = "Todos os eventos foram encontrados com sucesso!"),
     @ApiResponse(responseCode = "404", description = "Nenhum evento foi encontrado!", content = @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = EventoDTO.class))),
   })
-  @GetMapping("/todosEventos")
+  @GetMapping("/buscaTodosEventos")
   public ResponseEntity<List<EventoDTO>> buscaTodosEventos() 
   {
     List<EventoDTO> eventos = eventoServico.buscarEventos();
@@ -43,7 +43,7 @@ public class EventoControlador
   {
     @ApiResponse(responseCode = "200", description = "Evento encontrado com sucesso!", content = @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = EventoDTO.class))),
   })
-  @GetMapping("/{id}")
+  @GetMapping("/buscaEventoPorID/{id}")
   public ResponseEntity<EventoDTO> buscaEventoPorID(@PathVariable String id) 
   {
     EventoDTO eventoDTO = eventoServico.buscarEventoPorID(id);
@@ -59,7 +59,7 @@ public class EventoControlador
     @ApiResponse(responseCode = "200", description = "Eventos listados com sucesso!"),
     @ApiResponse(responseCode = "404", description = "Nenhum evento encontrado!", content = @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = EventoDTO.class))),
   })
-  @GetMapping("/listar-eventos-ordenados")
+  @GetMapping("/listarEventosAlfabéticamente")
   public ResponseEntity<List<EventoDTO>> eventosOrdenados() 
   {
     List<EventoDTO> eventos = eventoServico.buscarEventosOrdenados();
@@ -74,7 +74,7 @@ public class EventoControlador
   {
     @ApiResponse(responseCode = "201", description = "Evento criado com sucesso!", content = @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = EventoDTO.class))),
   })
-  @PostMapping
+  @PostMapping("/criaEvento")
   public ResponseEntity<EventoDTO> criarEvento(@RequestBody EventoDTO DTO) 
   {
     EventoDTO eventoCriado = eventoServico.criarEvento(DTO);
@@ -86,7 +86,7 @@ public class EventoControlador
     @ApiResponse(responseCode = "204", description = "Evento atualizado com sucesso!", content = @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = EventoDTO.class))),
     @ApiResponse(responseCode = "404", description = "Evento não encontrado!", content = @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = RuntimeException.class))),
   })
-  @PutMapping("/{id}")
+  @PutMapping("/atualizaEventoPorID/{id}")
   public ResponseEntity<EventoDTO> atualizarEventoPorID(@PathVariable String id, @RequestBody EventoDTO eventoDTO) 
   {
     EventoDTO eventoAtualizado = eventoServico.atualizarEventoPorID(id, eventoDTO); 
@@ -102,7 +102,7 @@ public class EventoControlador
     @ApiResponse(responseCode = "204", description = "Evento deletado com sucesso!", content = @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = EventoDTO.class))),
     @ApiResponse(responseCode = "404", description = "Evento não encontrado.", content = @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = RuntimeException.class))),
   })
-  @DeleteMapping(value = "/{id}")
+  @DeleteMapping("/deletaEventoPorID/{id}")
   public ResponseEntity<Void> deletarEventoPorID(@PathVariable String id) 
   {
     EventoDTO evento = eventoServico.buscarEventoPorID(id);

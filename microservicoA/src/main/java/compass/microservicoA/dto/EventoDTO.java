@@ -3,6 +3,7 @@ package compass.microservicoA.dto;
 import java.io.Serializable;
 import java.time.Instant;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 @Data
@@ -10,6 +11,7 @@ import lombok.*;
 @AllArgsConstructor
 public class EventoDTO implements Serializable
 {
+  @Schema(hidden = true)
   private String id;
   private Instant dataHora;
   private String nomeEvento;
