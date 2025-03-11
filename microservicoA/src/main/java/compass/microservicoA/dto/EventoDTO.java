@@ -20,8 +20,6 @@ public class EventoDTO implements Serializable
   private String nomeEvento;
   private String cep;
   private String logradouro;
-
-  @JsonProperty(access = JsonProperty.Access.READ_ONLY) 
   private String bairro;
 
   @JsonProperty(access = JsonProperty.Access.READ_ONLY) 

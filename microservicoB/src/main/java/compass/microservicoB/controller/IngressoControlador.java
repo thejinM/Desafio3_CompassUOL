@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @CrossOrigin(origins = "https://editor.swagger.io")
@@ -88,14 +89,16 @@ public class IngressoControlador
 
   @Operation(summary = "Cria um ingresso.", responses = 
   {
-    @ApiResponse(responseCode = "201", description = "Ingresso criado com sucesso!", content = @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = IngressoDTO.class))),
+      @ApiResponse(responseCode = "201", description = "Ingresso criado com sucesso!", content = @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = IngressoDTO.class))),
+      @ApiResponse(responseCode = "400", description = "Requisição inválida. O eventoID é obrigatório.", content = @Content(mediaType = "application/json;charset=UTF-8")),
+      @ApiResponse(responseCode = "404", description = "Evento não encontrado.", content = @Content(mediaType = "application/json;charset=UTF-8"))
   })
   @PostMapping("/criaIngresso")
   public ResponseEntity<IngressoDTO> criarIngresso(@RequestBody IngressoDTO DTO) 
   {
     IngressoDTO ingressoCriado = ingressoServico.criarIngresso(DTO);
     return ResponseEntity.status(HttpStatus.CREATED).body(ingressoCriado); 
-  }
+  }  
 
   @Operation(summary = "Atualiza um ingresso pelo seu ID.", responses = 
   {
@@ -129,5 +132,23 @@ public class IngressoControlador
       return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); 
     }    
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build(); 
+  }
+
+  @Operation(summary = "Verifica se existem ingressos vendidos para um evento.", responses = 
+  {
+    @ApiResponse(responseCode = "200", description = "Verificação realizada com sucesso!"),
+    @ApiResponse(responseCode = "404", description = "Nenhum ingresso encontrado para o evento!", content = @Content(mediaType = "application/json;charset=UTF-8"))
+  })
+  @GetMapping("/checarIngressosPorEventoID/{eventoID}")
+  public ResponseEntity<?> checarIngressosPorEventoID(@PathVariable String eventoID) 
+  {
+    List<IngressoDTO> ingressos = ingressoServico.buscarIngressosPorEventoID(eventoID);
+
+    if (!ingressos.isEmpty()) 
+    {
+      return ResponseEntity.ok().body(Map.of("eventoID", eventoID, "existemIngressos", true));
+    }
+
+    return ResponseEntity.ok().body(Map.of("eventoID", eventoID, "existemIngressos", false));
   }
 }

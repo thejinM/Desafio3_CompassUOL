@@ -2,12 +2,15 @@ package compass.microservicoA.service;
 
 import compass.microservicoA.dto.EventoDTO;
 import compass.microservicoA.entity.Evento;
+import compass.microservicoA.integracao.IntegracaoIngresso;
 import compass.microservicoA.integracao.ViaCEP;
 import compass.microservicoA.integracao.ViaCEPResposta;
 import compass.microservicoA.repository.EventoRepositorio;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,6 +23,9 @@ public class EventoServico
 
   @Autowired
   private ViaCEP viaCEP;
+
+  @Autowired
+  private IntegracaoIngresso integracaoIngresso;
 
   public List<EventoDTO> buscarEventos()
   {
@@ -101,20 +107,18 @@ public class EventoServico
     }
   }
 
-  public void deletarEventoPorID(String id)
+  public void deletarEventoPorID(String eventoID) 
   {
-    Evento evento = eventoRepositorio.findById(id).orElseThrow(() -> new RuntimeException("Evento não encontrado!"));
+    boolean existemIngressos = Boolean.TRUE.equals(integracaoIngresso.verificarIngressos(eventoID).get("existemIngressos"));
 
-    try
+    if (existemIngressos) 
     {
-      eventoRepositorio.delete(evento); 
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "O evento não pode ser deletado porque possui ingressos vendidos!");
     }
-    catch (Exception e)
-    {
-      throw new RuntimeException("Erro ao deletar evento!");
-    }
+
+    eventoRepositorio.deleteById(eventoID);
   }
-  
+
   private EventoDTO paraEventoDTO(Evento evento)
   {
     return new EventoDTO

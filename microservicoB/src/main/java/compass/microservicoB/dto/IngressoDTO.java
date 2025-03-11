@@ -1,6 +1,7 @@
 package compass.microservicoB.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.io.Serializable;
@@ -22,6 +23,7 @@ public class IngressoDTO implements Serializable
   private String nomeCliente;
   private String emailCliente;
  
+  @NotNull(message = "O eventoID é obrigatório!")
   @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
   private String eventoID;
 

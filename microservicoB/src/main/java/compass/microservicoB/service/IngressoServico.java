@@ -5,8 +5,12 @@ import compass.microservicoB.entity.EventoIngresso;
 import compass.microservicoB.entity.Ingresso;
 import compass.microservicoB.integracao.IntegracaoEvento;
 import compass.microservicoB.repository.IngressoRepositorio;
+import feign.FeignException;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -62,8 +66,20 @@ public class IngressoServico
 
   public IngressoDTO criarIngresso(IngressoDTO DTO) 
   {
+    if (DTO.getEventoID() == null || DTO.getEventoID().isBlank()) 
+    {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O eventoID é obrigatório.");
+    }
+
     try 
     {
+      EventoIngresso evento = integracaoEvento.buscarEventoPorID(DTO.getEventoID());
+
+      if (evento == null) 
+      {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "O evento informado não existe.");
+      }
+
       Ingresso ingresso = new Ingresso();
       ingresso.setId(UUID.randomUUID().toString());
       ingresso.setCpf(DTO.getCpf());
@@ -77,9 +93,13 @@ public class IngressoServico
 
       return paraIngressoDTO(ingressoRepositorio.save(ingresso));
     } 
+    catch (FeignException.NotFound e) 
+    {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "O evento informado não existe.");
+    }
     catch (Exception e) 
     {
-      throw new RuntimeException("Erro ao criar ingresso!", e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao criar ingresso.", e);
     }
   }
 
