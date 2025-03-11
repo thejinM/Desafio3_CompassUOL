@@ -22,6 +22,7 @@ public class IngressoDTO implements Serializable
   private String nomeCliente;
   private String emailCliente;
  
+  @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
   private String eventoID;
 
   @Schema(hidden = true) 
