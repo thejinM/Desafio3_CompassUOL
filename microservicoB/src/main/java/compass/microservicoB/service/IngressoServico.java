@@ -3,15 +3,18 @@ package compass.microservicoB.service;
 import compass.microservicoB.dto.IngressoDTO;
 import compass.microservicoB.entity.EventoIngresso;
 import compass.microservicoB.entity.Ingresso;
+import compass.microservicoB.exception.AtualizarIngressoException;
+import compass.microservicoB.exception.CriarIngressoException;
+import compass.microservicoB.exception.DeletarIngressoException;
+import compass.microservicoB.exception.EventoIDObrigatorioException;
+import compass.microservicoB.exception.EventoNaoEncontradoException;
+import compass.microservicoB.exception.IngressoNaoEncontradoException;
 import compass.microservicoB.integracao.IntegracaoEvento;
 import compass.microservicoB.repository.IngressoRepositorio;
 import feign.FeignException;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
@@ -34,14 +37,14 @@ public class IngressoServico
     List<Ingresso> ingressos = ingressoRepositorio.findAll();
     if (ingressos.isEmpty()) 
     {
-      throw new RuntimeException("Nenhum ingresso encontrado!");
+      throw new IngressoNaoEncontradoException();
     }
     return ingressos.stream().map(this::paraIngressoDTO).collect(Collectors.toList());
   }
 
   public IngressoDTO buscarIngressoPorID(String id) 
   {
-    return ingressoRepositorio.findById(id).map(this::paraIngressoDTO).orElseThrow(() -> new RuntimeException("Ingresso não encontrado!"));
+    return ingressoRepositorio.findById(id).map(this::paraIngressoDTO).orElseThrow(() -> new IngressoNaoEncontradoException());
   }
 
   public List<IngressoDTO> buscarIngressosPorEventoID(String eventoID) 
@@ -49,7 +52,7 @@ public class IngressoServico
     List<Ingresso> ingressos = ingressoRepositorio.findByEventoID(eventoID);
     if (ingressos.isEmpty()) 
     {
-      throw new RuntimeException("Nenhum ingresso encontrado para o evento!");
+      throw new IngressoNaoEncontradoException();
     }
     return ingressos.stream().map(this::paraIngressoDTO).collect(Collectors.toList());
   }
@@ -59,7 +62,7 @@ public class IngressoServico
     List<Ingresso> ingressos = ingressoRepositorio.findByCpf(cpf);
     if (ingressos.isEmpty()) 
     {
-      throw new RuntimeException("Nenhum ingresso encontrado para o CPF informado!");
+      throw new IngressoNaoEncontradoException();
     }
     return ingressos.stream().map(this::paraIngressoDTO).collect(Collectors.toList());
   }
@@ -68,7 +71,7 @@ public class IngressoServico
   {
     if (DTO.getEventoID() == null || DTO.getEventoID().isBlank()) 
     {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O eventoID é obrigatório.");
+      throw new EventoIDObrigatorioException();
     }
 
     try 
@@ -77,7 +80,7 @@ public class IngressoServico
 
       if (evento == null) 
       {
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "O evento informado não existe.");
+        throw new EventoNaoEncontradoException();
       }
 
       Ingresso ingresso = new Ingresso();
@@ -95,11 +98,11 @@ public class IngressoServico
     } 
     catch (FeignException.NotFound e) 
     {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "O evento informado não existe.");
+      throw new EventoNaoEncontradoException();
     }
     catch (Exception e) 
     {
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao criar ingresso.", e);
+      throw new CriarIngressoException(e);
     }
   }
 
@@ -107,7 +110,7 @@ public class IngressoServico
   {
     try 
     {
-      Ingresso ingressoAtualizado = ingressoRepositorio.findById(id).orElseThrow(() -> new RuntimeException("Ingresso não encontrado!"));
+      Ingresso ingressoAtualizado = ingressoRepositorio.findById(id).orElseThrow(() -> new IngressoNaoEncontradoException());
 
       ingressoAtualizado.setCpf(DTO.getCpf());
       ingressoAtualizado.setNomeCliente(DTO.getNomeCliente());
@@ -122,20 +125,20 @@ public class IngressoServico
     } 
     catch (Exception e) 
     {
-      throw new RuntimeException("Erro ao atualizar ingresso!", e);
+      throw new AtualizarIngressoException(e);
     }
   }
 
   public void deletarIngressoPorID(String id) 
   {
-    Ingresso ingresso = ingressoRepositorio.findById(id).orElseThrow(() -> new RuntimeException("Ingresso não encontrado!"));
+    Ingresso ingresso = ingressoRepositorio.findById(id).orElseThrow(() -> new IngressoNaoEncontradoException());
     try 
     {
       ingressoRepositorio.delete(ingresso);
     } 
     catch (Exception e) 
     {
-      throw new RuntimeException("Erro ao deletar ingresso!", e);
+      throw new DeletarIngressoException(e);
     }
   }
 

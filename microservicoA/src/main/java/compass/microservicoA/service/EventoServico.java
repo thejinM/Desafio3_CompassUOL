@@ -2,16 +2,17 @@ package compass.microservicoA.service;
 
 import compass.microservicoA.dto.EventoDTO;
 import compass.microservicoA.entity.Evento;
+import compass.microservicoA.exception.AtualizarEventoException;
+import compass.microservicoA.exception.CriarEventoException;
+import compass.microservicoA.exception.DeletarEventoException;
+import compass.microservicoA.exception.EventoNaoEncontradoException;
 import compass.microservicoA.integracao.IntegracaoIngresso;
 import compass.microservicoA.integracao.ViaCEP;
 import compass.microservicoA.integracao.ViaCEPResposta;
 import compass.microservicoA.repository.EventoRepositorio;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,7 +34,7 @@ public class EventoServico
 
     if (eventos.isEmpty())
     {
-      throw new RuntimeException("Nenhum evento encontrado!");
+      throw new EventoNaoEncontradoException();
     }
 
     return eventos.stream().map(this::paraEventoDTO).collect(Collectors.toList());
@@ -41,7 +42,7 @@ public class EventoServico
 
   public EventoDTO buscarEventoPorID(String id)
   {
-    return eventoRepositorio.findById(id).map(this::paraEventoDTO).orElseThrow(() -> new RuntimeException("Evento não encontrado!"));
+    return eventoRepositorio.findById(id).map(this::paraEventoDTO).orElseThrow(() -> new EventoNaoEncontradoException());
   }
 
   public List<EventoDTO> buscarEventosOrdenados() 
@@ -50,7 +51,7 @@ public class EventoServico
 
     if (eventos.isEmpty()) 
     {
-      throw new RuntimeException("Nenhum evento encontrado!");
+      throw new EventoNaoEncontradoException();
     }
   
     return eventos.stream().map(this::paraEventoDTO).collect(Collectors.toList());
@@ -76,7 +77,7 @@ public class EventoServico
     }
     catch (Exception e)
     {
-      throw new RuntimeException("Erro ao criar evento!");
+      throw new CriarEventoException();
     }
   }
 
@@ -84,7 +85,7 @@ public class EventoServico
   {
     try 
     {
-      Evento eventoAtualizado = eventoRepositorio.findById(id).orElseThrow(() -> new RuntimeException("Evento não encontrado!"));
+      Evento eventoAtualizado = eventoRepositorio.findById(id).orElseThrow(() -> new EventoNaoEncontradoException());
 
       eventoAtualizado.setNomeEvento(eventoDTO.getNomeEvento());
       eventoAtualizado.setDataHora(eventoDTO.getDataHora());
@@ -103,7 +104,7 @@ public class EventoServico
     }
     catch (Exception e)
     {
-      throw new RuntimeException("Erro ao atualizar evento!");
+      throw new AtualizarEventoException();
     }
   }
 
@@ -113,7 +114,7 @@ public class EventoServico
 
     if (existemIngressos) 
     {
-      throw new ResponseStatusException(HttpStatus.CONFLICT, "O evento não pode ser deletado porque possui ingressos vendidos!");
+      throw new DeletarEventoException();
     }
 
     eventoRepositorio.deleteById(eventoID);
