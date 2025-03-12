@@ -144,10 +144,14 @@ public class IngressoServico
 
   private void calcularValores(Ingresso ingresso) 
   {
-    if (ingresso.getValorTotalBRL() != null) 
+    if (ingresso.getValorTotalBRL() != null && conversao != null && conversao.compareTo(BigDecimal.ZERO) != 0) 
     {
       BigDecimal valorConvertido = ingresso.getValorTotalBRL().divide(conversao, 2, RoundingMode.HALF_UP);
       ingresso.setValorTotalUSD(valorConvertido);
+    } 
+    else 
+    {
+      ingresso.setValorTotalUSD(BigDecimal.ZERO); 
     }
   }
 

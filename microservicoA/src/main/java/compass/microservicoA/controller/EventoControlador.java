@@ -83,7 +83,7 @@ public class EventoControlador
 
   @Operation(summary = "Atualiza um evento pelo seu ID.", responses = 
   {
-    @ApiResponse(responseCode = "204", description = "Evento atualizado com sucesso!", content = @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = EventoDTO.class))),
+    @ApiResponse(responseCode = "200", description = "Evento atualizado com sucesso!", content = @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = EventoDTO.class))),
     @ApiResponse(responseCode = "404", description = "Evento não encontrado!", content = @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = RuntimeException.class))),
   })
   @PutMapping("/atualizaEventoPorID/{id}")

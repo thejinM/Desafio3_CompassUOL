@@ -4,15 +4,14 @@ import compass.microservicoA.dto.EventoDTO;
 import compass.microservicoA.entity.Evento;
 import compass.microservicoA.exception.AtualizarEventoException;
 import compass.microservicoA.exception.CriarEventoException;
-import compass.microservicoA.exception.DeletarEventoException;
 import compass.microservicoA.exception.EventoNaoEncontradoException;
-import compass.microservicoA.integracao.IntegracaoIngresso;
 import compass.microservicoA.integracao.ViaCEP;
 import compass.microservicoA.integracao.ViaCEPResposta;
 import compass.microservicoA.repository.EventoRepositorio;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,9 +23,6 @@ public class EventoServico
 
   @Autowired
   private ViaCEP viaCEP;
-
-  @Autowired
-  private IntegracaoIngresso integracaoIngresso;
 
   public List<EventoDTO> buscarEventos()
   {
@@ -89,6 +85,7 @@ public class EventoServico
 
       eventoAtualizado.setNomeEvento(eventoDTO.getNomeEvento());
       eventoAtualizado.setDataHora(eventoDTO.getDataHora());
+      eventoAtualizado.setDescricao(eventoDTO.getDescricao());
       
       if (!eventoAtualizado.getCep().equals(eventoDTO.getCep())) 
       {
@@ -110,16 +107,9 @@ public class EventoServico
 
   public void deletarEventoPorID(String eventoID) 
   {
-    boolean existemIngressos = Boolean.TRUE.equals(integracaoIngresso.verificarIngressos(eventoID).get("existemIngressos"));
-
-    if (existemIngressos) 
-    {
-      throw new DeletarEventoException();
-    }
-
     eventoRepositorio.deleteById(eventoID);
   }
-
+  
   private EventoDTO paraEventoDTO(Evento evento)
   {
     return new EventoDTO

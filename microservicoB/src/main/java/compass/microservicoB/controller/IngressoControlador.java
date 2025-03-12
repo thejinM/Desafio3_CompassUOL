@@ -102,7 +102,7 @@ public class IngressoControlador
 
   @Operation(summary = "Atualiza um ingresso pelo seu ID.", responses = 
   {
-    @ApiResponse(responseCode = "204", description = "Ingresso atualizado com sucesso!", content = @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = IngressoDTO.class))),
+    @ApiResponse(responseCode = "200", description = "Ingresso atualizado com sucesso!", content = @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = IngressoDTO.class))),
     @ApiResponse(responseCode = "404", description = "Ingresso não encontrado!", content = @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = RuntimeException.class))),
   })
   @PutMapping("/atualizaIngressoPorID/{id}")
@@ -125,30 +125,27 @@ public class IngressoControlador
   public ResponseEntity<Void> deletarIngressoPorID(@PathVariable String id) 
   {
     IngressoDTO ingresso = ingressoServico.buscarIngressoPorID(id);
-    ingressoServico.deletarIngressoPorID(id);
-    
-    if (ingresso == null)
+    if (ingresso == null) 
     {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); 
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }    
+    ingressoServico.deletarIngressoPorID(id);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build(); 
   }
 
   @Operation(summary = "Verifica se existem ingressos vendidos para um evento.", responses = 
   {
-    @ApiResponse(responseCode = "200", description = "Verificação realizada com sucesso!"),
+    @ApiResponse(responseCode = "204", description = "Verificação realizada com sucesso!"),
     @ApiResponse(responseCode = "404", description = "Nenhum ingresso encontrado para o evento!", content = @Content(mediaType = "application/json;charset=UTF-8"))
   })
   @GetMapping("/checarIngressosPorEventoID/{eventoID}")
-  public ResponseEntity<?> checarIngressosPorEventoID(@PathVariable String eventoID) 
+  public ResponseEntity<Map<String, Object>> checarIngressosPorEventoID(@PathVariable String eventoID) 
   {
     List<IngressoDTO> ingressos = ingressoServico.buscarIngressosPorEventoID(eventoID);
-
-    if (!ingressos.isEmpty()) 
+    if (ingressos.isEmpty()) 
     {
-      return ResponseEntity.ok().body(Map.of("eventoID", eventoID, "existemIngressos", true));
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("eventoID", eventoID, "existemIngressos", false));
     }
-
-    return ResponseEntity.ok().body(Map.of("eventoID", eventoID, "existemIngressos", false));
+    return ResponseEntity.ok().body(Map.of("eventoID", eventoID, "existemIngressos", true));
   }
 }

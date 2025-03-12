@@ -28,6 +28,5 @@ public class EventoDTO implements Serializable
   @JsonProperty(access = JsonProperty.Access.READ_ONLY) 
   private String uf;
 
-  @JsonProperty(access = JsonProperty.Access.READ_ONLY) 
   private String descricao;
 }
