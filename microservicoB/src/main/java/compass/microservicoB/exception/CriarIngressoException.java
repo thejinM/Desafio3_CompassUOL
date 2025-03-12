@@ -6,4 +6,9 @@ public class CriarIngressoException extends RuntimeException
   {
     super("Requisição inválida. O eventoID é obrigatório.", cause);
   }
+
+  public CriarIngressoException(String message, Throwable cause) 
+  {
+      super(message, cause);
+  }
 }

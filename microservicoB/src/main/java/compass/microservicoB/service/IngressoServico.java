@@ -73,7 +73,6 @@ public class IngressoServico
     {
       throw new EventoIDObrigatorioException();
     }
-
     try 
     {
       EventoIngresso evento = integracaoEvento.buscarEventoPorID(DTO.getEventoID());
@@ -95,22 +94,21 @@ public class IngressoServico
       calcularValores(ingresso);
 
       return paraIngressoDTO(ingressoRepositorio.save(ingresso));
-
+    } 
+    catch (EventoNaoEncontradoException e) 
+    {
+      throw e; 
     } 
     catch (FeignException.NotFound e) 
     {
-      throw new EventoNaoEncontradoException();
-    } 
-    catch (FeignException e) 
-    {
-      throw new RuntimeException("Erro ao comunicar com o microserviço de eventos: " + e.getMessage(), e);
+      throw new CriarIngressoException("Erro ao comunicar com o microserviço de eventos: " + e.getMessage(), e);
     } 
     catch (Exception e) 
     {
       throw new CriarIngressoException(e);
     }
   }
-
+  
   public IngressoDTO atualizarIngressoPorID(String id, IngressoDTO DTO) 
   {
     try 
@@ -124,9 +122,13 @@ public class IngressoServico
       ingressoAtualizado.setValorTotalBRL(DTO.getValorTotalBRL());
       ingressoAtualizado.setStatus("Confirmado!");
 
-      calcularValores(ingressoAtualizado); 
+      calcularValores(ingressoAtualizado);
 
       return paraIngressoDTO(ingressoRepositorio.save(ingressoAtualizado));
+    } 
+    catch (IngressoNaoEncontradoException e) 
+    {
+      throw e;
     } 
     catch (Exception e) 
     {
