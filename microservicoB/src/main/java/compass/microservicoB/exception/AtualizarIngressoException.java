@@ -4,6 +4,6 @@ public class AtualizarIngressoException extends RuntimeException
 {
   public AtualizarIngressoException(Throwable cause) 
   {
-    super("Erro ao atualizar ingresso!", cause);
+    super("Requisição inválida. Dados fornecidos para atualização do ingresso estão incompletos ou incorretos.", cause);
   }
 }

@@ -4,6 +4,6 @@ public class CriarIngressoException extends RuntimeException
 {
   public CriarIngressoException(Throwable cause) 
   {
-    super("Erro ao criar ingresso!", cause);
+    super("Requisição inválida. O eventoID é obrigatório.", cause);
   }
 }

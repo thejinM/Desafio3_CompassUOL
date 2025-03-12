@@ -4,6 +4,6 @@ public class IngressoNaoEncontradoException extends RuntimeException
 {
   public IngressoNaoEncontradoException() 
   {
-    super("Nenhum ingresso encontrado!");
+    super("Ingresso não encontrado.");
   }
 }

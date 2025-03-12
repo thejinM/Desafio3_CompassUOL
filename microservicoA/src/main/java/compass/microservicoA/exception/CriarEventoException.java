@@ -4,6 +4,6 @@ public class CriarEventoException extends RuntimeException
 {
   public CriarEventoException() 
   {
-    super("Erro ao criar evento!");
+    super("Requisição inválida. Campos obrigatórios podem estar ausentes ou com formato incorreto.");
   }
 }

@@ -4,6 +4,6 @@ public class AtualizarEventoException extends RuntimeException
 {
   public AtualizarEventoException() 
   {
-    super("Erro ao atualizar evento!");
+    super("Requisição inválida. Dados fornecidos para atualização estão incompletos ou incorretos.");
   }
 }

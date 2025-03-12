@@ -7,6 +7,6 @@ public class EventoIDObrigatorioException extends ResponseStatusException
 {
   public EventoIDObrigatorioException() 
   {
-    super(HttpStatus.BAD_REQUEST, "O eventoID é obrigatório.");
+    super(HttpStatus.BAD_REQUEST, "Requisição inválida. O eventoID é obrigatório.");
   }
 }

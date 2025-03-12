@@ -104,6 +104,7 @@ public class IngressoControlador
   {
     @ApiResponse(responseCode = "200", description = "Ingresso atualizado com sucesso!", content = @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = IngressoDTO.class))),
     @ApiResponse(responseCode = "404", description = "Ingresso não encontrado!", content = @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = RuntimeException.class))),
+    @ApiResponse(responseCode = "400", description = "Requisição inválida. Dados fornecidos para atualização do ingresso estão incompletos ou incorretos.", content = @Content(mediaType = "application/json;charset=UTF-8")),
   })
   @PutMapping("/atualizaIngressoPorID/{id}")
   public ResponseEntity<IngressoDTO> atualizarIngressoPorID(@PathVariable String id, @RequestBody IngressoDTO ingressoDTO) 
@@ -114,7 +115,7 @@ public class IngressoControlador
       return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); 
     }
     return ResponseEntity.status(HttpStatus.OK).body(ingressoAtualizado);
-  }
+  }  
 
   @Operation(summary = "Deleta um ingresso pelo seu ID.", responses = 
   {

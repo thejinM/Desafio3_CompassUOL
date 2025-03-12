@@ -42,15 +42,12 @@ public class EventoControlador
   @Operation(summary = "Busca um evento pelo seu ID.", responses = 
   {
     @ApiResponse(responseCode = "200", description = "Evento encontrado com sucesso!", content = @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = EventoDTO.class))),
+    @ApiResponse(responseCode = "404", description = "Nenhum evento foi encontrado!", content = @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = EventoDTO.class))),
   })
   @GetMapping("/buscaEventoPorID/{id}")
   public ResponseEntity<EventoDTO> buscaEventoPorID(@PathVariable String id) 
   {
     EventoDTO eventoDTO = eventoServico.buscarEventoPorID(id);
-    if (eventoDTO == null) 
-    {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); 
-    }
     return ResponseEntity.ok(eventoDTO); 
   }
 
@@ -73,29 +70,27 @@ public class EventoControlador
   @Operation(summary = "Cria um evento.", responses = 
   {
     @ApiResponse(responseCode = "201", description = "Evento criado com sucesso!", content = @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = EventoDTO.class))),
+    @ApiResponse(responseCode = "400", description = "Requisição inválida. Campos obrigatórios podem estar ausentes ou com formato incorreto.", content = @Content(mediaType = "application/json;charset=UTF-8")),
   })
   @PostMapping("/criaEvento")
-  public ResponseEntity<EventoDTO> criarEvento(@RequestBody EventoDTO DTO) 
+  public ResponseEntity<EventoDTO> criarEvento(@RequestBody EventoDTO eventoDTO) 
   {
-    EventoDTO eventoCriado = eventoServico.criarEvento(DTO);
+    EventoDTO eventoCriado = eventoServico.criarEvento(eventoDTO);
     return ResponseEntity.status(HttpStatus.CREATED).body(eventoCriado); 
-  }
+  }  
 
   @Operation(summary = "Atualiza um evento pelo seu ID.", responses = 
   {
     @ApiResponse(responseCode = "200", description = "Evento atualizado com sucesso!", content = @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = EventoDTO.class))),
     @ApiResponse(responseCode = "404", description = "Evento não encontrado!", content = @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = RuntimeException.class))),
+    @ApiResponse(responseCode = "400", description = "Requisição inválida. Dados fornecidos para atualização estão incompletos ou incorretos.", content = @Content(mediaType = "application/json;charset=UTF-8")),
   })
   @PutMapping("/atualizaEventoPorID/{id}")
   public ResponseEntity<EventoDTO> atualizarEventoPorID(@PathVariable String id, @RequestBody EventoDTO eventoDTO) 
   {
     EventoDTO eventoAtualizado = eventoServico.atualizarEventoPorID(id, eventoDTO); 
-    if (eventoAtualizado == null) 
-    {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); 
-    }
     return ResponseEntity.status(HttpStatus.OK).body(eventoAtualizado);
-  }
+  }  
 
   @Operation(summary = "Deleta um evento pelo seu ID.", responses = 
   {
@@ -105,13 +100,7 @@ public class EventoControlador
   @DeleteMapping("/deletaEventoPorID/{id}")
   public ResponseEntity<Void> deletarEventoPorID(@PathVariable String id) 
   {
-    EventoDTO evento = eventoServico.buscarEventoPorID(id);
     eventoServico.deletarEventoPorID(id);
-  
-    if (evento == null)
-    {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); 
-    }    
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build(); 
   }
 }

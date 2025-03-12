@@ -92,14 +92,19 @@ public class IngressoServico
       ingresso.setValorTotalBRL(DTO.getValorTotalBRL());
       ingresso.setStatus("Confirmado!");
 
-      calcularValores(ingresso); 
+      calcularValores(ingresso);
 
       return paraIngressoDTO(ingressoRepositorio.save(ingresso));
+
     } 
     catch (FeignException.NotFound e) 
     {
       throw new EventoNaoEncontradoException();
-    }
+    } 
+    catch (FeignException e) 
+    {
+      throw new RuntimeException("Erro ao comunicar com o microserviço de eventos: " + e.getMessage(), e);
+    } 
     catch (Exception e) 
     {
       throw new CriarIngressoException(e);
