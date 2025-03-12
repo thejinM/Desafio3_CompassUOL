@@ -1,6 +1,7 @@
 package compass.microservicoA.controller;
 
 import compass.microservicoA.dto.EventoDTO;
+import compass.microservicoA.exception.EventoNaoEncontradoException;
 import compass.microservicoA.service.EventoServico;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -47,8 +48,15 @@ public class EventoControlador
   @GetMapping("/buscaEventoPorID/{id}")
   public ResponseEntity<EventoDTO> buscaEventoPorID(@PathVariable String id) 
   {
-    EventoDTO eventoDTO = eventoServico.buscarEventoPorID(id);
-    return ResponseEntity.ok(eventoDTO); 
+    try 
+    {
+      EventoDTO eventoDTO = eventoServico.buscarEventoPorID(id);
+      return ResponseEntity.ok(eventoDTO);
+    } 
+    catch (EventoNaoEncontradoException e) 
+    {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
   }
 
   @Operation(summary = "Lista todos os eventos em ordem alfabética.", responses = 

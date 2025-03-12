@@ -19,7 +19,11 @@ public class EventoDTO implements Serializable
   private Instant dataHora;
   private String nomeEvento;
   private String cep;
+  
+  @JsonProperty(access = JsonProperty.Access.READ_ONLY) 
   private String logradouro;
+
+  @JsonProperty(access = JsonProperty.Access.READ_ONLY) 
   private String bairro;
 
   @JsonProperty(access = JsonProperty.Access.READ_ONLY) 
