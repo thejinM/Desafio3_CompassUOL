@@ -63,6 +63,12 @@ public class HandlerIngressosException
     return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Ocorreu um erro inesperado.");
   }
 
+  @ExceptionHandler(RuntimeException.class)
+  public ResponseEntity<Object> handleRuntimeException(RuntimeException ex) 
+  {
+    return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Erro interno no servidor: " + ex.getMessage());
+  } 
+
   private ResponseEntity<Object> buildResponse(HttpStatus status, String mensagem) 
   {
     Map<String, Object> response = new HashMap<>();

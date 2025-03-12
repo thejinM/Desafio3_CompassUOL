@@ -16,9 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.*;
 
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Optional;
+import java.util.*;
 
 class EventoServicoTest 
 {
@@ -111,6 +109,13 @@ class EventoServicoTest
   }
 
   @Test
+  void criarEvento_DeveLancarCriarEventoExceptionSeViaCepRetornarNulo() 
+  {
+    when(viaCEP.consultarCEP(eventoDTO.getCep())).thenReturn(null);
+    assertThrows(CriarEventoException.class, () -> eventoServico.criarEvento(eventoDTO));
+  }
+
+  @Test
   void atualizarEventoPorID_DeveAtualizarEvento() 
   {
     when(eventoRepositorio.findById("1")).thenReturn(Optional.of(evento));
@@ -133,6 +138,18 @@ class EventoServicoTest
   }
 
   @Test
+  void atualizarEventoPorID_DeveAtualizarEventoSemAlterarCEP() 
+  {
+    when(eventoRepositorio.findById("1")).thenReturn(Optional.of(evento));
+    when(eventoRepositorio.save(any(Evento.class))).thenReturn(evento);
+
+    EventoDTO resultado = eventoServico.atualizarEventoPorID("1", eventoDTO);
+    assertNotNull(resultado);
+    assertEquals(evento.getCep(), resultado.getCep());
+    verify(viaCEP, never()).consultarCEP(anyString()); // Garantir que o CEP não foi consultado
+  }
+
+  @Test
   void deletarEventoPorID_DeveDeletarEvento() 
   {
     when(eventoRepositorio.findById("1")).thenReturn(Optional.of(evento));
@@ -149,6 +166,13 @@ class EventoServicoTest
     when(integracaoIngresso.verificarIngressos("1")).thenReturn(Collections.singletonMap("existemIngressos", true));
 
     assertThrows(DeletarEventoException.class, () -> eventoServico.deletarEventoPorID("1"));
+  }
+
+  @Test
+  void deletarEventoPorID_DeveLancarEventoNaoEncontradoExceptionSeIdInexistente() 
+  {
+    when(eventoRepositorio.findById("1")).thenReturn(Optional.empty());
+    assertThrows(EventoNaoEncontradoException.class, () -> eventoServico.deletarEventoPorID("1"));
   }
 
   @Test

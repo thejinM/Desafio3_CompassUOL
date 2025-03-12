@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -48,6 +49,11 @@ public class EventoControlador
   @GetMapping("/buscaEventoPorID/{id}")
   public ResponseEntity<EventoDTO> buscaEventoPorID(@PathVariable String id) 
   {
+    if (id == null || id.trim().isEmpty()) 
+    {
+      return ResponseEntity.badRequest().build();
+    }
+  
     try 
     {
       EventoDTO eventoDTO = eventoServico.buscarEventoPorID(id);
@@ -81,11 +87,15 @@ public class EventoControlador
     @ApiResponse(responseCode = "400", description = "Requisição inválida. Campos obrigatórios podem estar ausentes ou com formato incorreto.", content = @Content(mediaType = "application/json;charset=UTF-8")),
   })
   @PostMapping("/criaEvento")
-  public ResponseEntity<EventoDTO> criarEvento(@RequestBody EventoDTO eventoDTO) 
+  public ResponseEntity<EventoDTO> criarEvento(@RequestBody @Valid EventoDTO eventoDTO) 
   {
+    if (eventoDTO == null) 
+    {
+      return ResponseEntity.badRequest().build();
+    }
     EventoDTO eventoCriado = eventoServico.criarEvento(eventoDTO);
-    return ResponseEntity.status(HttpStatus.CREATED).body(eventoCriado); 
-  }  
+    return ResponseEntity.status(HttpStatus.CREATED).body(eventoCriado);
+  }
 
   @Operation(summary = "Atualiza um evento pelo seu ID.", responses = 
   {
@@ -94,10 +104,26 @@ public class EventoControlador
     @ApiResponse(responseCode = "400", description = "Requisição inválida. Dados fornecidos para atualização estão incompletos ou incorretos.", content = @Content(mediaType = "application/json;charset=UTF-8")),
   })
   @PutMapping("/atualizaEventoPorID/{id}")
-  public ResponseEntity<EventoDTO> atualizarEventoPorID(@PathVariable String id, @RequestBody EventoDTO eventoDTO) 
+  public ResponseEntity<EventoDTO> atualizarEventoPorID(@PathVariable String id, @RequestBody @Valid EventoDTO eventoDTO) 
   {
-    EventoDTO eventoAtualizado = eventoServico.atualizarEventoPorID(id, eventoDTO); 
-    return ResponseEntity.status(HttpStatus.OK).body(eventoAtualizado);
+    if (id == null || id.isBlank()) 
+    {
+      return ResponseEntity.badRequest().build();
+    }
+  
+    try 
+    {
+      EventoDTO eventoAtualizado = eventoServico.atualizarEventoPorID(id, eventoDTO);
+      return ResponseEntity.ok(eventoAtualizado);
+    } 
+    catch (EventoNaoEncontradoException e) 
+    {
+      return ResponseEntity.notFound().build();
+    }
+    catch (Exception e) 
+    {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
   }  
 
   @Operation(summary = "Deleta um evento pelo seu ID.", responses = 
@@ -108,7 +134,19 @@ public class EventoControlador
   @DeleteMapping("/deletaEventoPorID/{id}")
   public ResponseEntity<Void> deletarEventoPorID(@PathVariable String id) 
   {
-    eventoServico.deletarEventoPorID(id);
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).build(); 
-  }
+    if (id == null || id.trim().isEmpty()) 
+    {
+      return ResponseEntity.badRequest().build();
+    }
+  
+    try 
+    {
+      eventoServico.deletarEventoPorID(id);
+      return ResponseEntity.noContent().build();
+    } 
+    catch (EventoNaoEncontradoException e) 
+    {
+      return ResponseEntity.notFound().build();
+    }
+  }  
 }

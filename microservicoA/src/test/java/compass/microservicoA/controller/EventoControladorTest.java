@@ -33,7 +33,7 @@ class EventoControladorTest
   void setup() 
   {
     MockitoAnnotations.openMocks(this);
-    eventoDTO = new EventoDTO("1", Instant.now(), "Evento Teste", "01001000", "Rua Teste", "Centro", "São Paulo", "SP","Descrição Teste");
+    eventoDTO = new EventoDTO("1", Instant.now(), "Evento Teste", "01001000", "Rua Teste", "Centro", "São Paulo", "SP", "Descrição Teste");
   }
 
   @Test
@@ -41,6 +41,7 @@ class EventoControladorTest
   {
     when(eventoServico.buscarEventos()).thenReturn(Collections.singletonList(eventoDTO));
     ResponseEntity<List<EventoDTO>> resposta = eventoControlador.buscaTodosEventos();
+    
     assertEquals(200, resposta.getStatusCode().value());
   }
 
@@ -49,6 +50,7 @@ class EventoControladorTest
   {
     when(eventoServico.buscarEventos()).thenReturn(Collections.emptyList());
     ResponseEntity<List<EventoDTO>> resposta = eventoControlador.buscaTodosEventos();
+    
     assertEquals(204, resposta.getStatusCode().value());
   }
 
@@ -57,6 +59,7 @@ class EventoControladorTest
   {
     when(eventoServico.buscarEventoPorID("1")).thenReturn(eventoDTO);
     ResponseEntity<EventoDTO> resposta = eventoControlador.buscaEventoPorID("1");
+
     assertEquals(200, resposta.getStatusCode().value());
     assertNotNull(resposta.getBody());
   }
@@ -66,7 +69,16 @@ class EventoControladorTest
   {
     when(eventoServico.buscarEventoPorID("1")).thenThrow(new EventoNaoEncontradoException());
     ResponseEntity<EventoDTO> resposta = eventoControlador.buscaEventoPorID("1");
+
     assertEquals(404, resposta.getStatusCode().value());
+  }
+
+  @Test
+  void buscaEventoPorID_DeveRetornarBadRequestSeIDInvalido() 
+  {
+    ResponseEntity<EventoDTO> resposta = eventoControlador.buscaEventoPorID("");
+
+    assertEquals(400, resposta.getStatusCode().value());
   }
 
   @Test
@@ -74,6 +86,7 @@ class EventoControladorTest
   {
     when(eventoServico.buscarEventosOrdenados()).thenReturn(Arrays.asList(eventoDTO));
     ResponseEntity<List<EventoDTO>> resposta = eventoControlador.eventosOrdenados();
+
     assertEquals(200, resposta.getStatusCode().value());
   }
 
@@ -82,6 +95,7 @@ class EventoControladorTest
   {
     when(eventoServico.buscarEventosOrdenados()).thenReturn(Collections.emptyList());
     ResponseEntity<List<EventoDTO>> resposta = eventoControlador.eventosOrdenados();
+
     assertEquals(204, resposta.getStatusCode().value());
   }
 
@@ -90,8 +104,17 @@ class EventoControladorTest
   {
     when(eventoServico.criarEvento(any(EventoDTO.class))).thenReturn(eventoDTO);
     ResponseEntity<EventoDTO> resposta = eventoControlador.criarEvento(eventoDTO);
+
     assertEquals(201, resposta.getStatusCode().value());
     assertNotNull(resposta.getBody());
+  }
+
+  @Test
+  void criarEvento_DeveRetornarBadRequestSeEventoInvalido() 
+  {
+    ResponseEntity<EventoDTO> resposta = eventoControlador.criarEvento(null);
+
+    assertEquals(400, resposta.getStatusCode().value());
   }
 
   @Test
@@ -99,7 +122,25 @@ class EventoControladorTest
   {
     when(eventoServico.atualizarEventoPorID(eq("1"), any(EventoDTO.class))).thenReturn(eventoDTO);
     ResponseEntity<EventoDTO> resposta = eventoControlador.atualizarEventoPorID("1", eventoDTO);
+
     assertEquals(200, resposta.getStatusCode().value());
+  }
+
+  @Test
+  void atualizarEventoPorID_DeveRetornarNotFoundSeEventoNaoExistir() 
+  {
+    when(eventoServico.atualizarEventoPorID(eq("1"), any(EventoDTO.class))).thenThrow(new EventoNaoEncontradoException());
+    ResponseEntity<EventoDTO> resposta = eventoControlador.atualizarEventoPorID("1", eventoDTO);
+
+    assertEquals(404, resposta.getStatusCode().value());
+  }
+
+  @Test
+  void atualizarEventoPorID_DeveRetornarBadRequestSeIDInvalido() 
+  {
+    ResponseEntity<EventoDTO> resposta = eventoControlador.atualizarEventoPorID("", eventoDTO);
+
+    assertEquals(400, resposta.getStatusCode().value());
   }
 
   @Test
@@ -107,6 +148,24 @@ class EventoControladorTest
   {
     doNothing().when(eventoServico).deletarEventoPorID("1");
     ResponseEntity<Void> resposta = eventoControlador.deletarEventoPorID("1");
+
     assertEquals(204, resposta.getStatusCode().value());
+  }
+
+  @Test
+  void deletarEventoPorID_DeveRetornarNotFoundSeEventoNaoExistir() 
+  {
+    doThrow(new EventoNaoEncontradoException()).when(eventoServico).deletarEventoPorID("1");
+    ResponseEntity<Void> resposta = eventoControlador.deletarEventoPorID("1");
+
+    assertEquals(404, resposta.getStatusCode().value());
+  }
+
+  @Test
+  void deletarEventoPorID_DeveRetornarBadRequestSeIDInvalido() 
+  {
+    ResponseEntity<Void> resposta = eventoControlador.deletarEventoPorID("");
+
+    assertEquals(400, resposta.getStatusCode().value());
   }
 }

@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Map;
@@ -40,19 +41,28 @@ public class IngressoControlador
     return ResponseEntity.ok().body(ingressos); 
   }
 
-  @Operation(summary = "Busca um ingresso pelo seu ID.", responses = 
+ @Operation(summary = "Busca um ingresso pelo seu ID.", responses = 
   {
     @ApiResponse(responseCode = "200", description = "Ingresso encontrado com sucesso!", content = @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = IngressoDTO.class))),
+    @ApiResponse(responseCode = "404", description = "Ingresso não encontrado."),
   })
   @GetMapping("/buscaIngressoPorID/{id}")
   public ResponseEntity<IngressoDTO> buscaIngressoPorID(@PathVariable String id) 
   {
-    IngressoDTO ingressoDTO = ingressoServico.buscarIngressoPorID(id);
-    if (ingressoDTO == null) 
+    try 
     {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); 
+      IngressoDTO ingresso = ingressoServico.buscarIngressoPorID(id);
+        
+      return ResponseEntity.ok(ingresso);
+    } 
+    catch (ResponseStatusException e) 
+    {
+      return ResponseEntity.status(e.getStatusCode()).build();
+    } 
+    catch (Exception e) 
+    {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
-    return ResponseEntity.ok(ingressoDTO); 
   }
 
   @Operation(summary = "Busca ingressos pelo ID do evento.", responses = 
@@ -60,16 +70,23 @@ public class IngressoControlador
     @ApiResponse(responseCode = "200", description = "Ingressos encontrados com sucesso!"),
     @ApiResponse(responseCode = "404", description = "Nenhum ingresso encontrado para o evento!", content = @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = IngressoDTO.class))),
   })
-  @GetMapping("/buscaIngressosPorEventoID/{eventoId}")
-  public ResponseEntity<List<IngressoDTO>> buscarIngressosPorEventoID(@PathVariable String eventoId) 
+  @GetMapping("/buscarIngressosPorEventoID/{eventoID}")
+  public ResponseEntity<List<IngressoDTO>> buscarIngressosPorEventoID(@PathVariable(required = false) String eventoID) 
   {
-    List<IngressoDTO> ingressos = ingressoServico.buscarIngressosPorEventoID(eventoId);
+    if (eventoID == null || eventoID.isBlank()) 
+    {
+      return ResponseEntity.badRequest().build();
+    }
+  
+    List<IngressoDTO> ingressos = ingressoServico.buscarIngressosPorEventoID(eventoID);
+      
     if (ingressos.isEmpty()) 
     {
-      return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+      return ResponseEntity.noContent().build();
     }
-    return ResponseEntity.ok().body(ingressos);
-  }
+  
+    return ResponseEntity.ok(ingressos);
+  }  
   
   @Operation(summary = "Busca ingressos pelo CPF do cliente.", responses = 
   {
@@ -94,27 +111,38 @@ public class IngressoControlador
       @ApiResponse(responseCode = "404", description = "Evento não encontrado.", content = @Content(mediaType = "application/json;charset=UTF-8"))
   })
   @PostMapping("/criaIngresso")
-  public ResponseEntity<IngressoDTO> criarIngresso(@RequestBody IngressoDTO DTO) 
+  public ResponseEntity<IngressoDTO> criarIngresso(@RequestBody IngressoDTO ingressoDTO) 
   {
-    IngressoDTO ingressoCriado = ingressoServico.criarIngresso(DTO);
+    IngressoDTO ingressoCriado = ingressoServico.criarIngresso(ingressoDTO);
+    if (ingressoDTO == null) 
+    {
+      return ResponseEntity.badRequest().build();
+    }
     return ResponseEntity.status(HttpStatus.CREATED).body(ingressoCriado); 
   }  
 
   @Operation(summary = "Atualiza um ingresso pelo seu ID.", responses = 
   {
-    @ApiResponse(responseCode = "200", description = "Ingresso atualizado com sucesso!", content = @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = IngressoDTO.class))),
-    @ApiResponse(responseCode = "404", description = "Ingresso não encontrado!", content = @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = RuntimeException.class))),
-    @ApiResponse(responseCode = "400", description = "Requisição inválida. Dados fornecidos para atualização do ingresso estão incompletos ou incorretos.", content = @Content(mediaType = "application/json;charset=UTF-8")),
+      @ApiResponse(responseCode = "200", description = "Ingresso atualizado com sucesso!", content = @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = IngressoDTO.class))),
+      @ApiResponse(responseCode = "404", description = "Ingresso não encontrado!", content = @Content(mediaType = "application/json;charset=UTF-8")),
+      @ApiResponse(responseCode = "400", description = "Requisição inválida. Dados fornecidos para atualização do ingresso estão incompletos ou incorretos.", content = @Content(mediaType = "application/json;charset=UTF-8")),
   })
   @PutMapping("/atualizaIngressoPorID/{id}")
   public ResponseEntity<IngressoDTO> atualizarIngressoPorID(@PathVariable String id, @RequestBody IngressoDTO ingressoDTO) 
   {
-    IngressoDTO ingressoAtualizado = ingressoServico.atualizarIngressoPorID(id, ingressoDTO); 
+    if (id == null || id.isBlank()) 
+    {
+      return ResponseEntity.badRequest().build();
+    }
+  
+    IngressoDTO ingressoAtualizado = ingressoServico.atualizarIngressoPorID(id, ingressoDTO);
+  
     if (ingressoAtualizado == null) 
     {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); 
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
-    return ResponseEntity.status(HttpStatus.OK).body(ingressoAtualizado);
+  
+    return ResponseEntity.ok(ingressoAtualizado);
   }  
 
   @Operation(summary = "Deleta um ingresso pelo seu ID.", responses = 
@@ -126,12 +154,14 @@ public class IngressoControlador
   public ResponseEntity<Void> deletarIngressoPorID(@PathVariable String id) 
   {
     IngressoDTO ingresso = ingressoServico.buscarIngressoPorID(id);
+      
     if (ingresso == null) 
     {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-    }    
+      return ResponseEntity.notFound().build();
+    }
+  
     ingressoServico.deletarIngressoPorID(id);
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).build(); 
+    return ResponseEntity.noContent().build();
   }
 
   @Operation(summary = "Verifica se existem ingressos vendidos para um evento.", responses = 
