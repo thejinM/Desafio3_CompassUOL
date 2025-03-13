@@ -75,13 +75,6 @@ public class IngressoServico
     }
     try 
     {
-      EventoIngresso evento = integracaoEvento.buscarEventoPorID(DTO.getEventoID());
-
-      if (evento == null) 
-      {
-        throw new EventoNaoEncontradoException();
-      }
-
       Ingresso ingresso = new Ingresso();
       ingresso.setId(UUID.randomUUID().toString());
       ingresso.setCpf(DTO.getCpf());
@@ -95,13 +88,9 @@ public class IngressoServico
 
       return paraIngressoDTO(ingressoRepositorio.save(ingresso));
     } 
-    catch (EventoNaoEncontradoException e) 
-    {
-      throw e; 
-    } 
     catch (FeignException.NotFound e) 
     {
-      throw new CriarIngressoException("Erro ao comunicar com o microserviço de eventos: " + e.getMessage(), e);
+      throw new EventoNaoEncontradoException();
     } 
     catch (Exception e) 
     {

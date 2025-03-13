@@ -9,6 +9,6 @@ public class CriarIngressoException extends RuntimeException
 
   public CriarIngressoException(String message, Throwable cause) 
   {
-      super(message, cause);
+    super(message, cause);
   }
 }

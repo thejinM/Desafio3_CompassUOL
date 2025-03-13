@@ -115,8 +115,7 @@ public class EventoServico
   {
     Evento evento = eventoRepositorio.findById(id).orElseThrow(EventoNaoEncontradoException::new);
     Map<String, Object> ingressos = integracaoIngresso.verificarIngressos(id);
-
-    if (Boolean.TRUE.equals(ingressos.get("existemIngressos"))) 
+    if (ingressos != null && Boolean.TRUE.equals(ingressos.get("existemIngressos"))) 
     {
       throw new DeletarEventoException();
     }

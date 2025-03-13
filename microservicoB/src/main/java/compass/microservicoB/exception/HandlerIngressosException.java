@@ -4,7 +4,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -16,19 +15,19 @@ public class HandlerIngressosException
   @ExceptionHandler(AtualizarIngressoException.class)
   public ResponseEntity<Object> handleAtualizarIngressoException(AtualizarIngressoException ex) 
   {
-    return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
+    return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
   }
 
   @ExceptionHandler(CriarIngressoException.class)
   public ResponseEntity<Object> handleCriarIngressoException(CriarIngressoException ex) 
   {
-    return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
+    return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
   }
 
   @ExceptionHandler(DeletarIngressoException.class)
   public ResponseEntity<Object> handleDeletarIngressoException(DeletarIngressoException ex) 
   {
-    return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
+    return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
   }
 
   @ExceptionHandler(EventoIDObrigatorioException.class)
@@ -49,14 +48,6 @@ public class HandlerIngressosException
     return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
   }
 
-  @ExceptionHandler(ResponseStatusException.class)
-  public ResponseEntity<Object> handleResponseStatusException(ResponseStatusException ex) 
-  {
-    HttpStatus status = HttpStatus.valueOf(ex.getStatusCode().value());
-    String mensagem = ex.getReason() != null ? ex.getReason() : "Erro inesperado.";
-    return buildResponse(status, mensagem);
-  }  
-
   @ExceptionHandler(Exception.class)
   public ResponseEntity<Object> handleGenericException(Exception ex) 
   {
@@ -67,7 +58,7 @@ public class HandlerIngressosException
   public ResponseEntity<Object> handleRuntimeException(RuntimeException ex) 
   {
     return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Erro interno no servidor: " + ex.getMessage());
-  } 
+  }
 
   private ResponseEntity<Object> buildResponse(HttpStatus status, String mensagem) 
   {

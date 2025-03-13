@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.Map;
 
+@Tag(name = "CONTROLADOR DE INGRESSOS: ")
 @RestController
 @CrossOrigin(origins = "https://editor.swagger.io")
 @RequestMapping(value = "/api/ingressos")
@@ -27,8 +29,8 @@ public class IngressoControlador
 
   @Operation(summary = "Busca todos os ingressos.", responses = 
   {
-      @ApiResponse(responseCode = "200", description = "Todos os ingressos foram encontrados com sucesso!"),
-      @ApiResponse(responseCode = "404", description = "Nenhum ingresso foi encontrado!", content = @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = IngressoDTO.class))),
+    @ApiResponse(responseCode = "200", description = "Todos os ingressos foram encontrados com sucesso!", content = @Content(schema = @Schema(implementation = IngressoDTO.class))),
+    @ApiResponse(responseCode = "204", description = "Nenhum ingresso foi encontrado!")
   })
   @GetMapping("/buscaTodosIngressos")
   public ResponseEntity<List<IngressoDTO>> buscaTodosIngressos() 
@@ -41,10 +43,11 @@ public class IngressoControlador
     return ResponseEntity.ok().body(ingressos); 
   }
 
- @Operation(summary = "Busca um ingresso pelo seu ID.", responses = 
+  @Operation(summary = "Busca um ingresso pelo seu ID.", responses = 
   {
-    @ApiResponse(responseCode = "200", description = "Ingresso encontrado com sucesso!", content = @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = IngressoDTO.class))),
+    @ApiResponse(responseCode = "200", description = "Ingresso encontrado com sucesso!", content = @Content(schema = @Schema(implementation = IngressoDTO.class))),
     @ApiResponse(responseCode = "404", description = "Ingresso não encontrado."),
+    @ApiResponse(responseCode = "500", description = "Erro interno ao buscar o ingresso.")
   })
   @GetMapping("/buscaIngressoPorID/{id}")
   public ResponseEntity<IngressoDTO> buscaIngressoPorID(@PathVariable String id) 
@@ -67,8 +70,9 @@ public class IngressoControlador
 
   @Operation(summary = "Busca ingressos pelo ID do evento.", responses = 
   {
-    @ApiResponse(responseCode = "200", description = "Ingressos encontrados com sucesso!"),
-    @ApiResponse(responseCode = "404", description = "Nenhum ingresso encontrado para o evento!", content = @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = IngressoDTO.class))),
+    @ApiResponse(responseCode = "200", description = "Ingressos encontrados com sucesso!", content = @Content(schema = @Schema(implementation = IngressoDTO.class))),
+    @ApiResponse(responseCode = "204", description = "Nenhum ingresso encontrado para o evento!"),
+    @ApiResponse(responseCode = "400", description = "Requisição inválida. O eventoID não pode ser nulo ou vazio.")
   })
   @GetMapping("/buscarIngressosPorEventoID/{eventoID}")
   public ResponseEntity<List<IngressoDTO>> buscarIngressosPorEventoID(@PathVariable(required = false) String eventoID) 
@@ -90,8 +94,8 @@ public class IngressoControlador
   
   @Operation(summary = "Busca ingressos pelo CPF do cliente.", responses = 
   {
-    @ApiResponse(responseCode = "200", description = "Ingressos encontrados com sucesso!"),
-    @ApiResponse(responseCode = "404", description = "Nenhum ingresso encontrado para o CPF!", content = @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = IngressoDTO.class))),
+    @ApiResponse(responseCode = "200", description = "Ingressos encontrados com sucesso!", content = @Content(schema = @Schema(implementation = IngressoDTO.class))),
+    @ApiResponse(responseCode = "204", description = "Nenhum ingresso encontrado para o CPF!")
   })
   @GetMapping("/buscaIngressosPorCPF/{cpf}")
   public ResponseEntity<List<IngressoDTO>> buscarIngressosPorCPF(@PathVariable String cpf) 
@@ -99,33 +103,34 @@ public class IngressoControlador
     List<IngressoDTO> ingressos = ingressoServico.buscarIngressosPorCPF(cpf);
     if (ingressos.isEmpty()) 
     {
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+      return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
     return ResponseEntity.ok().body(ingressos);
   }
 
   @Operation(summary = "Cria um ingresso.", responses = 
   {
-      @ApiResponse(responseCode = "201", description = "Ingresso criado com sucesso!", content = @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = IngressoDTO.class))),
-      @ApiResponse(responseCode = "400", description = "Requisição inválida. O eventoID é obrigatório.", content = @Content(mediaType = "application/json;charset=UTF-8")),
-      @ApiResponse(responseCode = "404", description = "Evento não encontrado.", content = @Content(mediaType = "application/json;charset=UTF-8"))
+    @ApiResponse(responseCode = "201", description = "Ingresso criado com sucesso!", content = @Content(schema = @Schema(implementation = IngressoDTO.class))),
+    @ApiResponse(responseCode = "400", description = "Requisição inválida. O eventoID é obrigatório."),
+    @ApiResponse(responseCode = "404", description = "Evento não encontrado.")
   })
   @PostMapping("/criaIngresso")
   public ResponseEntity<IngressoDTO> criarIngresso(@RequestBody IngressoDTO ingressoDTO) 
   {
-    IngressoDTO ingressoCriado = ingressoServico.criarIngresso(ingressoDTO);
     if (ingressoDTO == null) 
     {
       return ResponseEntity.badRequest().build();
     }
+    IngressoDTO ingressoCriado = ingressoServico.criarIngresso(ingressoDTO);
     return ResponseEntity.status(HttpStatus.CREATED).body(ingressoCriado); 
   }  
 
   @Operation(summary = "Atualiza um ingresso pelo seu ID.", responses = 
   {
-      @ApiResponse(responseCode = "200", description = "Ingresso atualizado com sucesso!", content = @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = IngressoDTO.class))),
-      @ApiResponse(responseCode = "404", description = "Ingresso não encontrado!", content = @Content(mediaType = "application/json;charset=UTF-8")),
-      @ApiResponse(responseCode = "400", description = "Requisição inválida. Dados fornecidos para atualização do ingresso estão incompletos ou incorretos.", content = @Content(mediaType = "application/json;charset=UTF-8")),
+    @ApiResponse(responseCode = "200", description = "Ingresso atualizado com sucesso!", content = @Content(schema = @Schema(implementation = IngressoDTO.class))),
+    @ApiResponse(responseCode = "400", description = "Requisição inválida. Dados fornecidos para atualização do ingresso estão incompletos ou incorretos."),
+    @ApiResponse(responseCode = "404", description = "Ingresso não encontrado!"),
+    @ApiResponse(responseCode = "500", description = "Erro interno ao atualizar o ingresso.")
   })
   @PutMapping("/atualizaIngressoPorID/{id}")
   public ResponseEntity<IngressoDTO> atualizarIngressoPorID(@PathVariable String id, @RequestBody IngressoDTO ingressoDTO) 
@@ -147,8 +152,9 @@ public class IngressoControlador
 
   @Operation(summary = "Deleta um ingresso pelo seu ID.", responses = 
   {
-    @ApiResponse(responseCode = "204", description = "Ingresso deletado com sucesso!", content = @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = IngressoDTO.class))),
-    @ApiResponse(responseCode = "404", description = "Ingresso não encontrado.", content = @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = RuntimeException.class))),
+    @ApiResponse(responseCode = "204", description = "Ingresso deletado com sucesso!"),
+    @ApiResponse(responseCode = "404", description = "Ingresso não encontrado."),
+    @ApiResponse(responseCode = "500", description = "Erro interno ao deletar o ingresso.")
   })
   @DeleteMapping("/deletaIngressoPorID/{id}")
   public ResponseEntity<Void> deletarIngressoPorID(@PathVariable String id) 
@@ -166,8 +172,9 @@ public class IngressoControlador
 
   @Operation(summary = "Verifica se existem ingressos vendidos para um evento.", responses = 
   {
-    @ApiResponse(responseCode = "204", description = "Verificação realizada com sucesso!"),
-    @ApiResponse(responseCode = "404", description = "Nenhum ingresso encontrado para o evento!", content = @Content(mediaType = "application/json;charset=UTF-8"))
+    @ApiResponse(responseCode = "200", description = "Verificação realizada.", content = @Content(schema = @Schema(implementation = Map.class))),
+    @ApiResponse(responseCode = "400", description = "Requisição inválida. O eventoID não pode ser nulo ou vazio."),
+    @ApiResponse(responseCode = "404", description = "Nenhum ingresso encontrado para o evento!")
   })
   @GetMapping("/checarIngressosPorEventoID/{eventoID}")
   public ResponseEntity<Map<String, Object>> checarIngressosPorEventoID(@PathVariable String eventoID) 

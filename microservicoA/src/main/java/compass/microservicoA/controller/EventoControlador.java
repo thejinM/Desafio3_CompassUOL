@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "CONTROLADOR DE EVENTOS: ")
 @RestController
 @CrossOrigin(origins = "https://editor.swagger.io")
 @RequestMapping(value = "/api/eventos")
@@ -27,8 +29,8 @@ public class EventoControlador
 
   @Operation(summary = "Busca todos os eventos.", responses = 
   {
-    @ApiResponse(responseCode = "200", description = "Todos os eventos foram encontrados com sucesso!"),
-    @ApiResponse(responseCode = "404", description = "Nenhum evento foi encontrado!", content = @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = EventoDTO.class))),
+    @ApiResponse(responseCode = "200", description = "Todos os eventos foram encontrados com sucesso!", content = @Content(schema = @Schema(implementation = EventoDTO.class))),
+    @ApiResponse(responseCode = "204", description = "Nenhum evento foi encontrado!")
   })
   @GetMapping("/buscaTodosEventos")
   public ResponseEntity<List<EventoDTO>> buscaTodosEventos() 
@@ -43,8 +45,9 @@ public class EventoControlador
 
   @Operation(summary = "Busca um evento pelo seu ID.", responses = 
   {
-    @ApiResponse(responseCode = "200", description = "Evento encontrado com sucesso!", content = @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = EventoDTO.class))),
-    @ApiResponse(responseCode = "404", description = "Nenhum evento foi encontrado!", content = @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = EventoDTO.class))),
+    @ApiResponse(responseCode = "200", description = "Evento encontrado com sucesso!", content = @Content(schema = @Schema(implementation = EventoDTO.class))),
+    @ApiResponse(responseCode = "400", description = "Requisição inválida. O ID não pode ser nulo ou vazio."),
+    @ApiResponse(responseCode = "404", description = "Nenhum evento foi encontrado!")
   })
   @GetMapping("/buscaEventoPorID/{id}")
   public ResponseEntity<EventoDTO> buscaEventoPorID(@PathVariable String id) 
@@ -67,10 +70,10 @@ public class EventoControlador
 
   @Operation(summary = "Lista todos os eventos em ordem alfabética.", responses = 
   {
-    @ApiResponse(responseCode = "200", description = "Eventos listados com sucesso!"),
-    @ApiResponse(responseCode = "404", description = "Nenhum evento encontrado!", content = @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = EventoDTO.class))),
+    @ApiResponse(responseCode = "200", description = "Eventos listados com sucesso!", content = @Content(schema = @Schema(implementation = EventoDTO.class))),
+    @ApiResponse(responseCode = "204", description = "Nenhum evento encontrado!")
   })
-  @GetMapping("/listarEventosAlfabéticamente")
+  @GetMapping("/listarEventosAlfabeticamente")
   public ResponseEntity<List<EventoDTO>> eventosOrdenados() 
   {
     List<EventoDTO> eventos = eventoServico.buscarEventosOrdenados();
@@ -83,11 +86,11 @@ public class EventoControlador
 
   @Operation(summary = "Cria um evento.", responses = 
   {
-    @ApiResponse(responseCode = "201", description = "Evento criado com sucesso!", content = @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = EventoDTO.class))),
-    @ApiResponse(responseCode = "400", description = "Requisição inválida. Campos obrigatórios podem estar ausentes ou com formato incorreto.", content = @Content(mediaType = "application/json;charset=UTF-8")),
+    @ApiResponse(responseCode = "201", description = "Evento criado com sucesso!", content = @Content(schema = @Schema(implementation = EventoDTO.class))),
+    @ApiResponse(responseCode = "400", description = "Requisição inválida. Campos obrigatórios podem estar ausentes ou com formato incorreto.")
   })
   @PostMapping("/criaEvento")
-  public ResponseEntity<EventoDTO> criarEvento(@RequestBody @Valid EventoDTO eventoDTO) 
+  public ResponseEntity<EventoDTO> criarEvento(@RequestBody EventoDTO eventoDTO) 
   {
     if (eventoDTO == null) 
     {
@@ -99,9 +102,10 @@ public class EventoControlador
 
   @Operation(summary = "Atualiza um evento pelo seu ID.", responses = 
   {
-    @ApiResponse(responseCode = "200", description = "Evento atualizado com sucesso!", content = @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = EventoDTO.class))),
-    @ApiResponse(responseCode = "404", description = "Evento não encontrado!", content = @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = RuntimeException.class))),
-    @ApiResponse(responseCode = "400", description = "Requisição inválida. Dados fornecidos para atualização estão incompletos ou incorretos.", content = @Content(mediaType = "application/json;charset=UTF-8")),
+    @ApiResponse(responseCode = "200", description = "Evento atualizado com sucesso!", content = @Content(schema = @Schema(implementation = EventoDTO.class))),
+    @ApiResponse(responseCode = "400", description = "Requisição inválida. O ID não pode ser nulo ou vazio."),
+    @ApiResponse(responseCode = "404", description = "Evento não encontrado!"),
+    @ApiResponse(responseCode = "500", description = "Erro interno ao atualizar o evento.")
   })
   @PutMapping("/atualizaEventoPorID/{id}")
   public ResponseEntity<EventoDTO> atualizarEventoPorID(@PathVariable String id, @RequestBody @Valid EventoDTO eventoDTO) 
@@ -128,8 +132,10 @@ public class EventoControlador
 
   @Operation(summary = "Deleta um evento pelo seu ID.", responses = 
   {
-    @ApiResponse(responseCode = "204", description = "Evento deletado com sucesso!", content = @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = EventoDTO.class))),
-    @ApiResponse(responseCode = "404", description = "Evento não encontrado.", content = @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = RuntimeException.class))),
+    @ApiResponse(responseCode = "204", description = "Evento deletado com sucesso!"),
+    @ApiResponse(responseCode = "400", description = "Requisição inválida. O ID não pode ser nulo ou vazio."),
+    @ApiResponse(responseCode = "404", description = "Evento não encontrado."),
+    @ApiResponse(responseCode = "409", description = "Evento não pode ser excluído, pois há ingressos vinculados a ele.")
   })
   @DeleteMapping("/deletaEventoPorID/{id}")
   public ResponseEntity<Void> deletarEventoPorID(@PathVariable String id) 

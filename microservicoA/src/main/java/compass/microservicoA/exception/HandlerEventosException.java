@@ -34,7 +34,7 @@ public class HandlerEventosException
   @ExceptionHandler(DeletarEventoException.class)
   public ResponseEntity<Object> handleDeletarEvento(DeletarEventoException ex) 
   {
-    return buildResponse(HttpStatus.valueOf(ex.getStatusCode().value()), ex.getReason());
+    return buildResponse(HttpStatus.NOT_FOUND, ex.getReason());
   }
 
   @ExceptionHandler(ResponseStatusException.class)

@@ -9,4 +9,11 @@ public class EventoNaoEncontradoException extends ResponseStatusException
   {
     super(HttpStatus.NOT_FOUND, "Evento não encontrado.");
   }
+
+  @SuppressWarnings("null")
+  @Override
+  public String getMessage() 
+  {
+    return "Evento não encontrado.";
+  } 
 }

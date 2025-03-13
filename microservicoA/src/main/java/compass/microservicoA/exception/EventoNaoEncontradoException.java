@@ -4,6 +4,6 @@ public class EventoNaoEncontradoException extends RuntimeException
 {
   public EventoNaoEncontradoException() 
   {
-    super("Nenhum evento encontrado!");
+    super("Evento não encontrado.");
   }
 }

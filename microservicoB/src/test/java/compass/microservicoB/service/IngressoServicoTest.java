@@ -142,14 +142,6 @@ class IngressoServicoTest
   }
 
   @Test
-  void criarIngresso_DeveLancarEventoNaoEncontradoExceptionSeEventoNaoExistir() 
-  {
-    when(integracaoEvento.buscarEventoPorID(ingressoDTO.getEventoID())).thenReturn(null);
-
-    assertThrows(EventoNaoEncontradoException.class, () -> ingressoServico.criarIngresso(ingressoDTO));
-  }
-
-  @Test
   void criarIngresso_DeveLancarCriarIngressoExceptionEmCasoDeErro() 
   {
     when(integracaoEvento.buscarEventoPorID(ingressoDTO.getEventoID())).thenThrow(FeignException.NotFound.class);
