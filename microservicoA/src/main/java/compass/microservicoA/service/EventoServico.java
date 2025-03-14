@@ -6,7 +6,6 @@ import compass.microservicoA.exception.AtualizarEventoException;
 import compass.microservicoA.exception.CriarEventoException;
 import compass.microservicoA.exception.DeletarEventoException;
 import compass.microservicoA.exception.EventoNaoEncontradoException;
-import compass.microservicoA.integracao.IntegracaoIngresso;
 import compass.microservicoA.integracao.ViaCEP;
 import compass.microservicoA.integracao.ViaCEPResposta;
 import compass.microservicoA.repository.EventoRepositorio;
@@ -14,7 +13,6 @@ import compass.microservicoA.repository.EventoRepositorio;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,9 +23,6 @@ public class EventoServico
 
   @Autowired
   private ViaCEP viaCEP;
-
-  @Autowired
-  private IntegracaoIngresso integracaoIngresso;
 
   public List<EventoDTO> buscarEventos()
   {

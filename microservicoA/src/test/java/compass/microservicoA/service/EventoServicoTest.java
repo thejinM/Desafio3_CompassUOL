@@ -160,15 +160,6 @@ class EventoServicoTest
   }
 
   @Test
-  void deletarEventoPorID_DeveLancarDeletarEventoExceptionSeExistiremIngressos() 
-  {
-    when(eventoRepositorio.findById("1")).thenReturn(Optional.of(evento));
-    when(integracaoIngresso.verificarIngressos("1")).thenReturn(Collections.singletonMap("existemIngressos", true));
-
-    assertThrows(DeletarEventoException.class, () -> eventoServico.deletarEventoPorID("1"));
-  }
-
-  @Test
   void deletarEventoPorID_DeveLancarEventoNaoEncontradoExceptionSeIdInexistente() 
   {
     when(eventoRepositorio.findById("1")).thenReturn(Optional.empty());
