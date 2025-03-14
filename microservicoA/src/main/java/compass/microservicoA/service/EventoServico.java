@@ -13,7 +13,6 @@ import compass.microservicoA.repository.EventoRepositorio;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -113,13 +112,12 @@ public class EventoServico
 
   public void deletarEventoPorID(String id) 
   {
-    Evento evento = eventoRepositorio.findById(id).orElseThrow(EventoNaoEncontradoException::new);
+    Evento evento = eventoRepositorio.findById(id).orElseThrow((EventoNaoEncontradoException::new));
     Map<String, Object> ingressos = integracaoIngresso.verificarIngressos(id);
     if (ingressos != null && Boolean.TRUE.equals(ingressos.get("existemIngressos"))) 
     {
       throw new DeletarEventoException();
     }
-
     try 
     {
       eventoRepositorio.delete(evento);

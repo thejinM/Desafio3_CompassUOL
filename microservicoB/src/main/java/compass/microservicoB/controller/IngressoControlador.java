@@ -173,8 +173,7 @@ public class IngressoControlador
   @Operation(summary = "Verifica se existem ingressos vendidos para um evento.", responses = 
   {
     @ApiResponse(responseCode = "200", description = "Verificação realizada.", content = @Content(schema = @Schema(implementation = Map.class))),
-    @ApiResponse(responseCode = "400", description = "Requisição inválida. O eventoID não pode ser nulo ou vazio."),
-    @ApiResponse(responseCode = "404", description = "Nenhum ingresso encontrado para o evento!")
+    @ApiResponse(responseCode = "400", description = "Requisição inválida. O eventoID não pode ser nulo ou vazio.")
   })
   @GetMapping("/checarIngressosPorEventoID/{eventoID}")
   public ResponseEntity<Map<String, Object>> checarIngressosPorEventoID(@PathVariable String eventoID) 
@@ -185,5 +184,5 @@ public class IngressoControlador
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("eventoID", eventoID, "existemIngressos", false));
     }
     return ResponseEntity.ok().body(Map.of("eventoID", eventoID, "existemIngressos", true));
-  }
+  } 
 }
